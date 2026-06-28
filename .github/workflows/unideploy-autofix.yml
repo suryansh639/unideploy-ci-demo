@@ -1,0 +1,37 @@
+name: UniDeploy Auto-Fix
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reproduce the failure
+        id: tests
+        continue-on-error: true
+        run: |
+          pip install -r requirements.txt
+          pytest -v 2>&1 | tee test-output.txt
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: UniDeploy diagnoses the failure
+        uses: suryansh639/unideploy-action@v1
+        with:
+          api-key: ${{ secrets.UNIDEPLOY_API_KEY }}
+          provider: amazon-bedrock
+          region: us-east-1
+          max-steps: "15"
+          prompt: >
+            Our CI test suite is failing. The test output is in the file
+            test-output.txt in the current directory. Read test-output.txt to
+            see which test failed, then read the source file cart.py and the
+            test file test_cart.py. Identify the exact bug, explain the root
+            cause in one sentence, and show the corrected line of code.
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
