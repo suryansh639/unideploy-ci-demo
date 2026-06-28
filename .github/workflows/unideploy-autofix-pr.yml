@@ -49,18 +49,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Drop generated artifacts so they don't end up in the PR
+          # Keep the PR clean: only the real source fix, no build artifacts.
           rm -f test-output.txt unideploy-output.txt
-          rm -rf .Unideploy
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "UniDeploy made no code changes."
+          rm -rf .Unideploy __pycache__ .pytest_cache
+          git checkout -- . 2>/dev/null || true
+          # Re-apply only cart.py changes (restore everything, then keep cart.py edit)
+          # Simplest: stage only cart.py
+          if git diff --quiet -- cart.py; then
+            echo "UniDeploy made no change to cart.py."
             exit 1
           fi
           BRANCH="unideploy/auto-fix-$(date +%s)"
           git config user.name "UniDeploy Bot"
           git config user.email "bot@unideploy.com"
           git checkout -b "$BRANCH"
-          git add -A
+          git add cart.py
           git commit -m "fix: resolve failing CI test (auto-fixed by UniDeploy)"
           git push origin "$BRANCH"
           gh pr create \
