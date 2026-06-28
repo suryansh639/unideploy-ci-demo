@@ -52,9 +52,6 @@ jobs:
           # Keep the PR clean: only the real source fix, no build artifacts.
           rm -f test-output.txt unideploy-output.txt
           rm -rf .Unideploy __pycache__ .pytest_cache
-          git checkout -- . 2>/dev/null || true
-          # Re-apply only cart.py changes (restore everything, then keep cart.py edit)
-          # Simplest: stage only cart.py
           if git diff --quiet -- cart.py; then
             echo "UniDeploy made no change to cart.py."
             exit 1
