@@ -65,12 +65,5 @@ jobs:
           git push origin "$BRANCH"
           gh pr create \
             --title "fix: sum cart item prices instead of subtracting" \
-            --body "## 🤖 Auto-fixed by UniDeploy
-
-CI was failing because \`add_item_prices\` subtracted each price instead of adding it.
-
-UniDeploy read the failing test, located the bug in \`cart.py\`, applied the fix, and re-ran the tests — they now pass. ✅
-
-**Root cause:** arithmetic typo (\`-\` instead of \`+\`).
-**Result:** \`add_item_prices([10, 20, 30])\` now correctly returns \`60\`." \
+            --body "Auto-fixed by UniDeploy. CI was failing because add_item_prices subtracted each price instead of adding it. UniDeploy read the failing test, fixed the bug in cart.py, and re-ran the tests — they now pass. Root cause: arithmetic typo (- instead of +)." \
             --base main --head "$BRANCH"
