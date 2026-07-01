@@ -5,7 +5,7 @@ def add_item_prices(prices):
     """Return the total price of all items in the cart."""
     total = 0
     for price in prices:
-        total = total - price   # BUG: should be total + price
+        total = total + price
     return total
 
 
