@@ -34,9 +34,10 @@ jobs:
             Our CI tests are failing. Read the file test-output.txt to see which
             test failed. Then read cart.py, find the bug, and FIX it by editing
             cart.py directly with your file-editing tools. The function
-            add_item_prices must SUM the prices. After editing, run pytest to
-            confirm the tests pass. Apply the fix directly, do not ask for
-            confirmation.
+            add_item_prices must SUM the prices. Also update or remove any code
+            comment that is now inaccurate, so the final code reads cleanly with
+            no leftover BUG notes. After editing, run pytest to confirm the tests
+            pass. Apply the fix directly, do not ask for confirmation.
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -49,7 +50,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Keep the PR clean: only the real source fix, no build artifacts.
           rm -f test-output.txt unideploy-output.txt
           rm -rf .Unideploy __pycache__ .pytest_cache
           if git diff --quiet -- cart.py; then
@@ -61,9 +61,16 @@ jobs:
           git config user.email "bot@unideploy.com"
           git checkout -b "$BRANCH"
           git add cart.py
-          git commit -m "fix: resolve failing CI test (auto-fixed by UniDeploy)"
+          git commit -m "fix: sum cart item prices instead of subtracting (auto-fixed by UniDeploy)"
           git push origin "$BRANCH"
           gh pr create \
-            --title "fix: auto-fix failing CI test" \
-            --body "This pull request was generated automatically by **UniDeploy** after CI failed. UniDeploy read the failing test, located the bug in cart.py, and applied the fix. Tests now pass. ✅" \
+            --title "fix: sum cart item prices instead of subtracting" \
+            --body "## 🤖 Auto-fixed by UniDeploy
+
+CI was failing because \`add_item_prices\` subtracted each price instead of adding it.
+
+UniDeploy read the failing test, located the bug in \`cart.py\`, applied the fix, and re-ran the tests — they now pass. ✅
+
+**Root cause:** arithmetic typo (\`-\` instead of \`+\`).
+**Result:** \`add_item_prices([10, 20, 30])\` now correctly returns \`60\`." \
             --base main --head "$BRANCH"
